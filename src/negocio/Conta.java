@@ -1,30 +1,34 @@
-package entities;
+package negocio;
 
 import java.sql.Date;
 
 public class Conta {
-	private int id;
+	private String id;
 	private String nickname;
 	private int posicao;
 	private Date data;
 	private String email;
 	private String senha;
 	private String login;
+	
 
-	public Conta(int id_conta, String nickname, String email, String senha, String login, Date data) {
-		this.id = id_conta;
+	public Conta(String id, String nickname, int posicao, String email, String senha, String login, Date data) {
+		this.id = id;
 		this.nickname = nickname;
+		this.posicao = posicao;
 		this.email = email;
 		this.senha = senha;
 		this.login = login;
 		this.data = data;
 	}
 
-	public int getId() {
+
+
+	public String getId() {
 		return id;
 	}
 
-	public void setId(int id_conta) {
+	public void setId(String id_conta) {
 		this.id = id_conta;
 	}
 

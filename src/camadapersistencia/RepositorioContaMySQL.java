@@ -4,20 +4,21 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import entities.Conta;
+import java.util.Enumeration;
+
+import negocio.Conta;
 
 public class RepositorioContaMySQL implements RepositorioContas {
 
 	private MecanismoPersistenciaBDR mecanismoPersistencia;
 
 	public RepositorioContaMySQL(MecanismoPersistenciaBDR mecanismoPersistencia) {
-	this.mecanismoPersistencia = mecanismoPersistencia;
-	try {
-	mecanismoPersistencia.conectar();
-	}
-	catch(Exception e) {
-	e.printStackTrace();
-	}
+		this.mecanismoPersistencia = mecanismoPersistencia;
+		try {
+			mecanismoPersistencia.conectar();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void inserir(Conta conta) throws RepositorioException {
@@ -26,8 +27,10 @@ public class RepositorioContaMySQL implements RepositorioContas {
 		}
 		Connection con = null;
 		try {
-			String query = "INSERT INTO CONTA (id, nick_name, posicao_1, data_criacao, email, login, senha) VALUES('" + conta.getId() + "' , '"
-					+ conta.getNickname() + "' , '"+ conta.getPosicao() + "','" + conta.getData() + "' , '" + conta.getEmail() + "' , '" + conta.getLogin() + "' , '" + conta.getSenha() +"')";
+			String query = "INSERT INTO CONTA (id, nickname, posicao, _data, email, login, senha) VALUES('"
+					+ conta.getId() + "' , '" + conta.getNickname() + "' , '" + conta.getPosicao() + "','"
+					+ conta.getData() + "' , '" + conta.getEmail() + "' , '" + conta.getSenha() + "', '"
+					+ conta.getLogin() + "')";
 			con = (Connection)
 
 			mecanismoPersistencia.getCanalComunicacao();
@@ -39,7 +42,7 @@ public class RepositorioContaMySQL implements RepositorioContas {
 		}
 	}
 
-	public boolean existe(Integer numero) throws RepositorioException {
+	public boolean existe(String numero) throws RepositorioException {
 		if (numero == null) {
 			throw new IllegalArgumentException("Conta inválida");
 		}
@@ -83,13 +86,14 @@ public class RepositorioContaMySQL implements RepositorioContas {
 		Conta resposta = null;
 		ResultSet rs = null;
 		try {
-			String query = "SELECT nickname, posicao  FROM CONTA WHERE id='" + numero + "'";
+			String query = "SELECT nickname FROM CONTA WHERE posicao='" + numero + "'";
 			con = (Connection) mecanismoPersistencia.getCanalComunicacao();
 
 			stmt = con.createStatement();
 			rs = stmt.executeQuery(query);
 			if (rs.next()) {
-				resposta = new Conta(rs.getInt("id"), rs.getString("nickname"), rs.getString("email"), rs.getString("senha"), rs.getString("login"), rs.getDate("data"));
+				resposta = new Conta(rs.getString("id"), rs.getString("nickname"), rs.getInt("posicao"), rs.getString("email"),
+						rs.getString("senha"), rs.getString("login"), rs.getDate("data"));
 			} else {
 				throw new ContaNaoCadastradaException();
 			}
@@ -139,15 +143,15 @@ public class RepositorioContaMySQL implements RepositorioContas {
 		}
 	}
 
-	public void remover(String numero) throws RepositorioException, ContaNaoCadastradaException {
-		if (numero == null) {
+	public void remover(String nickname) throws RepositorioException, ContaNaoCadastradaException {
+		if (nickname == null) {
 			throw new IllegalArgumentException("Conta inválida");
 		}
 		Connection con = null;
 		try {
-			String query = "DELETE FROM CONTA WHERE id ='" +
+			String query = "DELETE FROM CONTA WHERE nickname ='" +
 
-					numero + "'";
+					nickname + "'";
 			con = (Connection) mecanismoPersistencia.getCanalComunicacao();
 
 			Statement stmt = con.createStatement();
@@ -159,6 +163,53 @@ public class RepositorioContaMySQL implements RepositorioContas {
 		} catch (SQLException ex) {
 			throw new RepositorioException(ex);
 		}
+
+	}
+
+	public Enumeration retornaTodos() throws RepositorioException {
+		RepositorioContasArray resposta = new RepositorioContasArray(100);
+		Connection con = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+		try {
+			String query = "SELECT numero, nome_cliente , saldo FROM CONTA";
+			con = (Connection) mecanismoPersistencia.getCanalComunicacao();
+			stmt = con.createStatement();
+			rs = stmt.executeQuery(query);
+			while (rs.next()) {
+				resposta.inserir(new Conta(rs.getString("id"),
+
+						rs.getString("nickname"), rs.getInt("posicao"), rs.getString("email"), rs.getString("senha"), rs.getString("login"), rs.getDate("data")));
+			}
+		} catch (SQLException ex) {
+
+			throw new RepositorioException(ex);
+
+		} finally {
+			if (rs != null) {
+
+				try {
+					rs.close();
+				} catch (Exception ex1) {
+
+					throw new RepositorioException(ex1);
+
+				}
+
+			}
+			if (stmt != null) {
+
+				try {
+					stmt.close();
+				} catch (Exception ex2) {
+
+					throw new RepositorioException(ex2);
+
+				}
+
+			}
+		}
+		return resposta;
 
 	}
 }
