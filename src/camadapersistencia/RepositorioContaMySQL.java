@@ -42,8 +42,8 @@ public class RepositorioContaMySQL implements RepositorioContas {
 		}
 	}
 
-	public boolean existe(String numero) throws RepositorioException {
-		if (numero == null) {
+	public boolean existe(String nickname) throws RepositorioException {
+		if (nickname == null) {
 			throw new IllegalArgumentException("Conta inválida");
 		}
 		boolean resposta = false;
@@ -51,9 +51,9 @@ public class RepositorioContaMySQL implements RepositorioContas {
 		Statement stmt = null;
 		ResultSet rs = null;
 		try {
-			String query = "SELECT * FROM CONTA WHERE id='" +
+			String query = "SELECT * FROM CONTA WHERE nickname='" +
 
-					numero + "'";
+					nickname + "'";
 			con = (Connection) mecanismoPersistencia.getCanalComunicacao();
 			stmt = con.createStatement();
 			rs = stmt.executeQuery(query);
@@ -78,9 +78,9 @@ public class RepositorioContaMySQL implements RepositorioContas {
 	}
 
 	public Conta procurar(String numero) throws RepositorioException, ContaNaoCadastradaException {
-		if (numero == null) {
-			throw new IllegalArgumentException("Conta inválida");
-		}
+		/*
+		 * if (numero == null) { throw new IllegalArgumentException("Conta inválida"); }
+		 */
 		Connection con = null;
 		Statement stmt = null;
 		Conta resposta = null;
